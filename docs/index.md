@@ -1,5 +1,5 @@
 ﻿---
-title: OS Notes Web
+title: OS_Learning
 tags: [index]
 difficulty: overview
 review: 2026-04-26
@@ -9,10 +9,10 @@ review: 2026-04-26
 import { withBase } from 'vitepress'
 </script>
 
-# OS Notes Web
+# OS_Learning
 
 <div class="os-home-hero">
-  <img class="os-home-hero__logo" :src="withBase('/logo-round.png')" alt="OS Notes Web logo">
+  <img class="os-home-hero__logo" :src="withBase('/logo-round.png')" alt="OS_Learning logo">
   <div>
     <p class="os-home-hero__eyebrow">Operating Systems Study Notes</p>
     <p class="os-home-hero__lead">面向复习、实验和概念辨析的操作系统学习笔记。内容以 Markdown 为主线，配合题目、知识地图和本地学习进度，帮助你把零散概念串成可复盘的结构。</p>
@@ -64,4 +64,4 @@ import { withBase } from 'vitepress'
 - [考试与综合测试](./exams/)：集中进入 2024 期中、2025 期中和综合补充测试。
 - [推荐资料](./resources.md)：补充教材、课程和实验参考链接。
 - [学习进度](./progress.md)：查看本地阅读、做题和错题记录。
-- [GitHub repository](https://github.com/rippor911/os-easy-note)：反馈错误或补充内容。
+- [GitHub repository](https://github.com/Gwanhyn/OS)：反馈错误或补充内容。

@@ -1,4 +1,4 @@
-# OS Notes Web
+# OS_Learning
 
 一个面向计算机学生的操作系统学习笔记网站骨架，使用 VitePress、Vue 3、TypeScript 与 Markdown 构建。目标是把手写 Markdown 笔记沉淀为可长期维护、可复习、可刷题的静态学习站点。
 

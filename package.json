@@ -1,5 +1,5 @@
 {
-  "name": "os-notes-web",
+  "name": "os-learning",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,6 +10,8 @@
     "dev": "vitepress dev",
     "prebuild": "node scripts/clean-dist.mjs",
     "build": "vitepress build",
+    "build:pages": "cross-env VITEPRESS_BASE=/OS_Learning/ vitepress build",
+    "deploy": "npm run build:pages && gh-pages -d dist",
     "preview": "vitepress preview",
     "typecheck": "vue-tsc --noEmit",
     "check:docs": "node scripts/check-docs.mjs",
@@ -23,6 +25,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "cross-env": "^10.1.0",
+    "gh-pages": "^6.3.0",
     "typescript": "^5.7.2",
     "vue-tsc": "^2.2.0"
   }

@@ -254,8 +254,8 @@ function adjacentStrongPlugin(md: any) {
 }
 
 export default defineConfig({
-  title: 'OS Notes Web',
-  description: 'Operating system notes for study and review.',
+  title: 'OS_Learning',
+  description: 'Operating system learning notes for study and review.',
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: assetWithBase('/logo-round.png') }],
     ['link', { rel: 'apple-touch-icon', href: assetWithBase('/logo-round.png') }]
@@ -304,7 +304,7 @@ export default defineConfig({
       text: '\u6700\u540e\u66f4\u65b0'
     },
     footer: {
-      message: 'Markdown-first OS learning notes.',
+      message: 'OS_Learning markdown-first notes.',
       copyright: 'Released for personal study and review.'
     }
   }
