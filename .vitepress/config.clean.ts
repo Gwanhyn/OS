@@ -254,7 +254,7 @@ function adjacentStrongPlugin(md: any) {
 }
 
 export default defineConfig({
-  title: 'OS_Learning',
+  title: 'OS',
   description: 'Operating system learning notes for study and review.',
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: assetWithBase('/logo-round.png') }],
@@ -304,7 +304,7 @@ export default defineConfig({
       text: '\u6700\u540e\u66f4\u65b0'
     },
     footer: {
-      message: 'OS_Learning markdown-first notes.',
+      message: 'OS markdown-first notes.',
       copyright: 'Released for personal study and review.'
     }
   }

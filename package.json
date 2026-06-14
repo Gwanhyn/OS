@@ -1,5 +1,5 @@
 {
-  "name": "os-learning",
+  "name": "os",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "dev": "vitepress dev",
     "prebuild": "node scripts/clean-dist.mjs",
     "build": "vitepress build",
-    "build:pages": "cross-env VITEPRESS_BASE=/OS_Learning/ vitepress build",
+    "build:pages": "cross-env VITEPRESS_BASE=/OS/ vitepress build",
     "deploy": "npm run build:pages && gh-pages -d dist",
     "preview": "vitepress preview",
     "typecheck": "vue-tsc --noEmit",
