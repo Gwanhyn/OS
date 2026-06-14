@@ -651,6 +651,8 @@ const blankAnswers = ref<Record<string, string>>({})
 const subjectiveAnswers = ref<Record<string, string>>({})
 const subjectiveJudgements = ref<Record<string, boolean | undefined>>({})
 const submitted = ref(false)
+const revealAllAnswers = ref(false)
+const submittedQuestionIds = ref<Set<string>>(new Set())
 
 const objectiveQuestions = computed<ObjectiveQuestion[]>(() => [
   ...trueFalseQuestions,
@@ -677,12 +679,15 @@ const questionCount = computed(() => objectiveQuestions.value.length + subjectiv
 const subjectiveJudgedCount = computed(() => (
   subjectiveQuestions.filter((question) => typeof subjectiveJudgements.value[question.id] === 'boolean').length
 ))
+const submittedAnswerCount = computed(() => submittedQuestionIds.value.size)
 
 const objectiveScore = computed(() => {
   if (!submitted.value) return 0
-  return objectiveQuestions.value.reduce((sum, question) => (
-    isObjectiveCorrect(question) ? sum + question.points : sum
-  ), 0)
+  return objectiveQuestions.value
+    .filter((question) => submittedQuestionIds.value.has(question.id))
+    .reduce((sum, question) => (
+      isObjectiveCorrect(question) ? sum + question.points : sum
+    ), 0)
 })
 
 function normalizeAnswer(value: string) {
@@ -735,6 +740,14 @@ function hasObjectiveAnswer(question: ObjectiveQuestion) {
   return Boolean(blankAnswers.value[question.id]?.trim())
 }
 
+function hasSubjectiveAnswer(question: SubjectiveQuestion) {
+  return Boolean(subjectiveAnswers.value[question.id]?.trim())
+}
+
+function shouldShowAnswer(question: { id: string }) {
+  return revealAllAnswers.value || submittedQuestionIds.value.has(question.id)
+}
+
 function selectedText(question: ObjectiveQuestion) {
   if (question.type === 'true-false') return boolLabel(trueFalseAnswers.value[question.id])
   if (question.type === 'single') return choiceAnswers.value[question.id] || '未作答'
@@ -782,8 +795,20 @@ function recordObjective(question: ObjectiveQuestion) {
 function submitPaper() {
   if (answeredCount.value === 0) return
 
+  const nextSubmittedQuestionIds = new Set(submittedQuestionIds.value)
   submitted.value = true
-  objectiveQuestions.value.filter(hasObjectiveAnswer).forEach(recordObjective)
+  objectiveQuestions.value.filter(hasObjectiveAnswer).forEach((question) => {
+    nextSubmittedQuestionIds.add(question.id)
+    recordObjective(question)
+  })
+  subjectiveQuestions.filter(hasSubjectiveAnswer).forEach((question) => {
+    nextSubmittedQuestionIds.add(question.id)
+  })
+  submittedQuestionIds.value = nextSubmittedQuestionIds
+}
+
+function showAllAnswers() {
+  revealAllAnswers.value = true
 }
 
 function judgeSubjective(question: SubjectiveQuestion, correct: boolean) {
@@ -810,6 +835,8 @@ function resetPaper() {
   subjectiveAnswers.value = {}
   subjectiveJudgements.value = {}
   submitted.value = false
+  revealAllAnswers.value = false
+  submittedQuestionIds.value = new Set()
 }
 </script>
 
@@ -857,7 +884,7 @@ function resetPaper() {
             ×
           </button>
         </div>
-        <div v-if="submitted" class="exam-result" :class="{ 'is-correct': isObjectiveCorrect(question) }">
+        <div v-if="shouldShowAnswer(question)" class="exam-result" :class="{ 'is-correct': isObjectiveCorrect(question) }">
           <strong>{{ isObjectiveCorrect(question) ? '正确' : `错误，答案：${answerText(question)}` }}</strong>
           <p>{{ question.explanation }}</p>
         </div>
@@ -878,8 +905,8 @@ function resetPaper() {
             type="button"
             :class="{
               'is-selected': choiceAnswers[question.id] === option.label,
-              'is-answer': submitted && question.answer === option.label,
-              'is-wrong': submitted && choiceAnswers[question.id] === option.label && !isObjectiveCorrect(question)
+              'is-answer': shouldShowAnswer(question) && question.answer === option.label,
+              'is-wrong': shouldShowAnswer(question) && choiceAnswers[question.id] === option.label && !isObjectiveCorrect(question)
             }"
             @click="choiceAnswers[question.id] = option.label"
           >
@@ -887,7 +914,7 @@ function resetPaper() {
             <span>{{ option.text }}</span>
           </button>
         </div>
-        <div v-if="submitted" class="exam-result" :class="{ 'is-correct': isObjectiveCorrect(question) }">
+        <div v-if="shouldShowAnswer(question)" class="exam-result" :class="{ 'is-correct': isObjectiveCorrect(question) }">
           <strong>{{ isObjectiveCorrect(question) ? '正确' : `错误，答案：${answerText(question)}` }}</strong>
           <p>{{ question.explanation }}</p>
         </div>
@@ -906,7 +933,7 @@ function resetPaper() {
             placeholder="输入答案"
           >
         </label>
-        <div v-if="submitted" class="exam-result" :class="{ 'is-correct': isObjectiveCorrect(question) }">
+        <div v-if="shouldShowAnswer(question)" class="exam-result" :class="{ 'is-correct': isObjectiveCorrect(question) }">
           <strong>{{ isObjectiveCorrect(question) ? '正确' : `标准答案：${answerText(question)}` }}</strong>
           <p>{{ question.explanation }}</p>
         </div>
@@ -931,7 +958,7 @@ function resetPaper() {
           placeholder="写下你的作答要点；客观题提交后会显示参考答案"
         />
 
-        <div v-if="submitted" class="exam-reference">
+        <div v-if="shouldShowAnswer(question)" class="exam-reference">
           <h4>参考答案</h4>
           <ul>
             <li v-for="item in question.answer" :key="item">{{ item }}</li>
@@ -964,16 +991,22 @@ function resetPaper() {
 
     <footer class="exam-paper__footer">
       <button type="button" :disabled="answeredCount === 0" @click="submitPaper">
-        {{ submitted ? '再次提交并刷新结果' : '提交已作答题目并显示答案' }}
+        {{ submitted ? '继续作答并提交' : '提交已作答题目并显示答案' }}
       </button>
       <button v-if="submitted" type="button" class="is-secondary" @click="resetPaper">
         重新作答
       </button>
+      <button v-if="submitted && !revealAllAnswers" type="button" class="is-secondary" @click="showAllAnswers">
+        显示所有答案
+      </button>
       <p v-if="!submitted">
         已作答 {{ answeredCount }} / {{ questionCount }}，可先提交查看答案，之后继续作答并再次提交。
       </p>
+      <p v-else-if="revealAllAnswers">
+        已显示所有答案；仍可继续填写并提交记录。
+      </p>
       <p v-else>
-        已显示答案；仍有 {{ objectiveUnansweredCount }} 道客观题未作答，可继续填写后再次提交刷新记录。
+        已显示 {{ submittedAnswerCount }} 道已提交题目的答案；仍有 {{ objectiveUnansweredCount }} 道客观题未作答，可继续填写后再次提交刷新记录。
       </p>
       <p v-if="submitted">
         主观题已判 {{ subjectiveJudgedCount }} / {{ subjectiveQuestions.length }}，判为错误的题会进入错题记录。
