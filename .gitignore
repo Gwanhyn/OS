@@ -1,0 +1,12 @@
+node_modules
+dist
+.vitepress/cache
+.vitepress/dist
+*.local
+.DS_Store
+Thumbs.db
+.agents/
+*.log
+local_temp/
+os.2025-期末考试.pdf
+os.2025-期末考试.txt
