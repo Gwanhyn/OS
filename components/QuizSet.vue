@@ -45,7 +45,6 @@ function resetAnswer() {
 }
 
 function choose(label: string) {
-  if (checked.value) return
   selected.value = label
 }
 
@@ -127,8 +126,8 @@ watch(() => [props.collection, props.questionIds?.join('|')], () => {
       </div>
 
       <footer class="quiz-set__footer">
-        <button class="quiz-set__submit" type="button" :disabled="!selected || checked" @click="submit">
-          提交答案
+        <button class="quiz-set__submit" type="button" :disabled="!selected" @click="submit">
+          {{ checked ? '再次提交答案' : '提交答案' }}
         </button>
         <button v-if="hasNext" class="quiz-set__next" type="button" :disabled="!checked" @click="nextQuestion">
           下一题

@@ -655,6 +655,18 @@ function isObjectiveCorrect(question: ObjectiveQuestion) {
   return isBlankCorrect(question)
 }
 
+function hasObjectiveAnswer(question: ObjectiveQuestion) {
+  if (question.type === 'true-false') {
+    return typeof trueFalseAnswers.value[question.id] === 'boolean'
+  }
+
+  if (question.type === 'single') {
+    return Boolean(choiceAnswers.value[question.id])
+  }
+
+  return Boolean(blankAnswers.value[question.id]?.trim())
+}
+
 function selectedText(question: ObjectiveQuestion) {
   if (question.type === 'true-false') return boolLabel(trueFalseAnswers.value[question.id])
   if (question.type === 'single') return choiceAnswers.value[question.id] || '未作答'
@@ -700,10 +712,10 @@ function recordObjective(question: ObjectiveQuestion) {
 }
 
 function submitPaper() {
-  if (!allAnswered.value) return
+  if (answeredCount.value === 0) return
 
   submitted.value = true
-  objectiveQuestions.value.forEach(recordObjective)
+  objectiveQuestions.value.filter(hasObjectiveAnswer).forEach(recordObjective)
 }
 
 function judgeSubjective(question: SubjectiveQuestion, correct: boolean) {
@@ -739,7 +751,7 @@ function resetPaper() {
       <div>
         <p class="exam-paper__eyebrow">Interactive Exam</p>
         <h2>2025 期末考试</h2>
-        <p>客观题提交整卷后自动判分；主观题提交后显示参考答案，由你自行判定是否进入错题记录。</p>
+        <p>提交已作答题目后显示答案并自动判分；之后可以继续作答、再次提交刷新记录。</p>
       </div>
       <div class="exam-paper__score">
         <strong>{{ submitted ? objectiveScore : '-' }}</strong>
@@ -764,7 +776,6 @@ function resetPaper() {
         <div class="exam-question__actions">
           <button
             type="button"
-            :disabled="submitted"
             :class="{ 'is-selected': trueFalseAnswers[question.id] === true }"
             @click="trueFalseAnswers[question.id] = true"
           >
@@ -772,7 +783,6 @@ function resetPaper() {
           </button>
           <button
             type="button"
-            :disabled="submitted"
             :class="{ 'is-selected': trueFalseAnswers[question.id] === false }"
             @click="trueFalseAnswers[question.id] = false"
           >
@@ -802,7 +812,6 @@ function resetPaper() {
             v-for="option in question.options"
             :key="option.label"
             type="button"
-            :disabled="submitted"
             :class="{
               'is-selected': choiceAnswers[question.id] === option.label,
               'is-answer': submitted && question.answer === option.label,
@@ -833,7 +842,6 @@ function resetPaper() {
           <ExamSupplements :blocks="question.supplements" />
           <input
             v-model="blankAnswers[question.id]"
-            :disabled="submitted"
             type="text"
             placeholder="输入答案"
           >
@@ -863,7 +871,6 @@ function resetPaper() {
         <ExamSupplements :blocks="question.supplements" />
         <textarea
           v-model="subjectiveAnswers[question.id]"
-          :disabled="submitted"
           rows="6"
           placeholder="写下你的作答要点"
         />
@@ -898,14 +905,19 @@ function resetPaper() {
     </section>
 
     <footer class="exam-paper__footer">
-      <button type="button" :disabled="!allAnswered" @click="submitPaper">
-        {{ submitted ? '重新统计客观题' : '提交整卷' }}
+      <button type="button" :disabled="answeredCount === 0" @click="submitPaper">
+        {{ submitted ? '再次提交并刷新结果' : '提交已作答题目并显示答案' }}
       </button>
       <button v-if="submitted" type="button" class="is-secondary" @click="resetPaper">
         重新作答
       </button>
-      <p v-if="!allAnswered">还有 {{ unansweredCount }} 题未作答，提交后才会显示答案。</p>
-      <p v-else-if="submitted">
+      <p v-if="!submitted">
+        已作答 {{ answeredCount }} / {{ questionCount }}，可先提交查看答案，之后继续作答并再次提交。
+      </p>
+      <p v-else>
+        已显示答案；仍有 {{ unansweredCount }} 题未作答，可继续填写后再次提交刷新记录。
+      </p>
+      <p v-if="submitted">
         主观题已判 {{ subjectiveJudgedCount }} / {{ subjectiveQuestions.length }}，判为错误的题会进入错题记录。
       </p>
     </footer>

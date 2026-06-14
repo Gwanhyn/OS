@@ -308,7 +308,6 @@ function resetAll() {
           v-for="option in question.options"
           :key="option.label"
           type="button"
-          :disabled="submitted[question.id]"
           :class="{
             'is-selected': singleAnswers[question.id] === option.label,
             'is-answer': submitted[question.id] && question.answer === option.label,
@@ -326,7 +325,6 @@ function resetAll() {
           v-for="option in question.options"
           :key="option.label"
           type="button"
-          :disabled="submitted[question.id]"
           :class="{
             'is-selected': (multipleAnswers[question.id] || []).includes(option.label),
             'is-answer': submitted[question.id] && question.answer.includes(option.label),
@@ -343,15 +341,14 @@ function resetAll() {
         <span>你的作答</span>
         <input
           v-model="blankAnswers[question.id]"
-          :disabled="submitted[question.id]"
           type="text"
           :placeholder="question.placeholder || '输入答案'"
         >
       </label>
 
       <div class="addition-question__actions">
-        <button type="button" :disabled="!hasAnswered(question) || submitted[question.id]" @click="submitQuestion(question)">
-          提交本题
+        <button type="button" :disabled="!hasAnswered(question)" @click="submitQuestion(question)">
+          {{ submitted[question.id] ? '再次提交本题' : '提交本题' }}
         </button>
       </div>
 
